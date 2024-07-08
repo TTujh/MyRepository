@@ -36,12 +36,12 @@ def connectToSendData(code):
 
         if len(stdout[0]) > len(stdout[1]):
             index = 0
-            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}'")
+            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}';")
             to_out = cursor.fetchall()
             colnames.append([desc[0] for desc in cursor.description])
         elif len(stdout[1]) > len(stdout[0]):
             index = 1
-            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}'")
+            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}';")
             to_out = cursor.fetchall()
             colnames.append([desc[0] for desc in cursor.description])
         else:
