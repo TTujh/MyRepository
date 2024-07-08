@@ -54,7 +54,7 @@ def connectToSendData(code):
             if len(to_out) > 0:
                 output_text += f'{colnames[2][x]} – {to_out[0][x]}\n'
             else:
-                output_text += Информация отсутствует.
+                output_text += "Информация отсутствует."
                 breake
 
         cursor.close()
