@@ -12,10 +12,7 @@ def connectToSendData(code):
     user = config.get("DataBase", "user")
     password = config.get("DataBase", "password")
     port = config.get("DataBase", "port")
-    all_tables = []
-    with open('connect.txt') as tables:
-        for i in tables.read().split('\n')[2:-1]:
-            all_tables.append(i.strip())
+    all_tables = ['codes_input', 'codes_output']
     where_code = []
     try:
         connection = psql.connect(dbname=dbname, user=user, password=password, host=host, port=port)
