@@ -35,24 +35,26 @@ def connectToSendData(code):
 
         if len(stdout[0]) > len(stdout[1]):
             index = 0
-            cursor.execute(f"SELECT * FROM products WHERE id = {max(stdout)[index][3]}")
+            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}'")
             to_out = cursor.fetchall()
             colnames.append([desc[0] for desc in cursor.description])
         elif len(stdout[1]) > len(stdout[0]):
             index = 1
-            cursor.execute(f"SELECT * FROM products WHERE id = {max(stdout)[index][3]}")
+            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}'")
             to_out = cursor.fetchall()
             colnames.append([desc[0] for desc in cursor.description])
         else:
             return '<b>Информация об отсканированном коде отсутствует.</b>'
         output_text = 'Информация об отсканированном коде:\n'
-        for i in range(len(max(stdout)[index])):
-            if max(stdout)[index][i]:
-                output_text += f'{colnames[index][i]} – {max(stdout)[index][i]}\n'
+        for i in range(len(stdout[index][0])):
+            if stdout[index][0][i]:
+                output_text += f'{colnames[index][i]} – {stdout[index][0][i]}\n'
         output_text += '\nИнформация о сопутствующем коду товаре:\n'
         for x in range(1, len(colnames[2])):
-            if to_out[0][x]:
+            if len(to_out) > 0:
                 output_text += f'{colnames[2][x]} – {to_out[0][x]}\n'
+            else:
+                continue
 
         cursor.close()
         connection.close()
@@ -66,3 +68,4 @@ def connectToSendData(code):
         connection.close()
 
 
+# print(connectToSendData('3031303436303730313534393030313532313543456942252d594a4534503e1d393371767478'))
