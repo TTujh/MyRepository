@@ -5,6 +5,7 @@ import datetime
 
 
 def connectToSendData(code):
+    code_hex = code.encode().hex()
     path = os.getcwd() + '/settings.ini'
     config = configparser.ConfigParser()
     config.read(path)
@@ -21,13 +22,13 @@ def connectToSendData(code):
         cursor = connection.cursor()
 
         cursor.execute(
-            f"SELECT DISTINCT * FROM codes_input i LEFT JOIN codes_input_ext e ON i.id = e.codes_input_id WHERE code_hex = '{code}';"
+            f"SELECT DISTINCT * FROM codes_input i LEFT JOIN codes_input_ext e ON i.id = e.codes_input_id WHERE code_hex = '{code_hex}';"
         )
         colnames.append([desc[0] for desc in cursor.description])
         stdout.append(cursor.fetchall())
 
         cursor.execute(
-            f"SELECT DISTINCT * FROM codes_output o LEFT JOIN codes_output_ext e ON o.element_id = e.codes_output_id WHERE code_hex = '{code}';"
+            f"SELECT DISTINCT * FROM codes_output o LEFT JOIN codes_output_ext e ON o.element_id = e.codes_output_id WHERE code_hex = '{code_hex}';"
         )
         colnames.append([desc[0] for desc in cursor.description])
         stdout.append(cursor.fetchall())
@@ -54,8 +55,8 @@ def connectToSendData(code):
             if len(to_out) > 0:
                 output_text += f'{colnames[2][x]} – {to_out[0][x]}\n'
             else:
-                output_text += "Информация отсутствует."
-                breake
+                output_text += "Информация отсутсвует."
+                break
 
         cursor.close()
         connection.close()
