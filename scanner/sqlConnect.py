@@ -70,4 +70,4 @@ def connectToSendData(code):
         connection.close()
 
 
-# print(connectToSendData('3031303436303730313534393030313532313543456942252d594a4534503e1d393371767478'))
+# print(connectToSendData('0104607015490015215CEiB%-YJE4P>93qvtx'))
