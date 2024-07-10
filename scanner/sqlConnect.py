@@ -1,73 +1,51 @@
+"""Module sql_connection response for connection to local/remote SQL database"""
+
 import psycopg2 as psql
-import configparser
-import os
 import datetime
 
 
-def connectToSendData(code):
-    code_hex = code.encode().hex()
-    path = os.getcwd() + '/settings.ini'
-    config = configparser.ConfigParser()
-    config.read(path)
-    host = config.get("DataBase", "host")
-    dbname = config.get("DataBase", "dbname")
-    user = config.get("DataBase", "user")
-    password = config.get("DataBase", "password")
-    port = config.get("DataBase", "port")
-    stdout = []
-    colnames = []
+class RemotePostgresDatabase:
+    connection: psql.connect
 
-    try:
-        connection = psql.connect(dbname=dbname, user=user, password=password, host=host, port=port)
-        cursor = connection.cursor()
+    def __init__(self, dbname: str, user: str, password: str, host: str, port: str) -> None:
+        self.connection = psql.connect(dbname=dbname,
+                                       user=user,
+                                       password=password,
+                                       host=host,
+                                       port=port)
 
-        cursor.execute(
-            f"SELECT DISTINCT * FROM codes_input i LEFT JOIN codes_input_ext e ON i.id = e.codes_input_id WHERE code_hex = '{code_hex}';"
+        self._information, self._columns = [], []
+        self.cursor = self.connection.cursor()
+
+    def _get_code_information(self, code: bytes) -> None:
+        code = code.decode('unicode_escape').encode()
+        self.cursor.execute(
+            f"SELECT DISTINCT * FROM codes_input i LEFT JOIN codes_input_ext e ON i.id = e.codes_input_id WHERE code_hex = '{code.hex()}';"
         )
-        colnames.append([desc[0] for desc in cursor.description])
-        stdout.append(cursor.fetchall())
+        self._put_code_information()
 
-        cursor.execute(
-            f"SELECT DISTINCT * FROM codes_output o LEFT JOIN codes_output_ext e ON o.element_id = e.codes_output_id WHERE code_hex = '{code_hex}';"
+        self.cursor.execute(
+            f"SELECT DISTINCT * FROM codes_output WHERE code_hex = '{code.hex()}';"
         )
-        colnames.append([desc[0] for desc in cursor.description])
-        stdout.append(cursor.fetchall())
+        self._put_code_information()
 
+    def _put_code_information(self) -> None:
+        fetchall = self.cursor.fetchall()
+        if len(fetchall) != 0:
+            self._columns.append([desc[0] for desc in self.cursor.description])
+            self._information.append(fetchall)
+            self.cursor.execute(f"SELECT * FROM products WHERE id = '{self._information[0][0][3]}';")
+            self._columns.append([desc[0] for desc in self.cursor.description])
+            self._information.append(self.cursor.fetchall())
 
-        if len(stdout[0]) > len(stdout[1]):
-            index = 0
-            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}';")
-            to_out = cursor.fetchall()
-            colnames.append([desc[0] for desc in cursor.description])
-        elif len(stdout[1]) > len(stdout[0]):
-            index = 1
-            cursor.execute(f"SELECT * FROM products WHERE id = '{stdout[index][0][3]}';")
-            to_out = cursor.fetchall()
-            colnames.append([desc[0] for desc in cursor.description])
+    def get_answer(self, code: bytes) -> str:
+        self._get_code_information(code=code)
+        answer = 'ИНФОРМАЦИЯ О КОДЕ:\n'
+        if len(self._columns) != 0:
+            for i in range(len(self._columns[0])):
+                if self._information[0][0][i]:
+                    answer += f'{self._columns[0][i]} — {self._information[0][0][i]}\n'
         else:
-            return '<b>Информация об отсканированном коде отсутствует.</b>'
-        output_text = 'Информация об отсканированном коде:\n'
-        for i in range(len(stdout[index][0])):
-            if stdout[index][0][i]:
-                output_text += f'{colnames[index][i]} – {stdout[index][0][i]}\n'
-        output_text += '\nИнформация о сопутствующем коду товаре:\n'
-        for x in range(1, len(colnames[2])):
-            if len(to_out) > 0:
-                output_text += f'{colnames[2][x]} – {to_out[0][x]}\n'
-            else:
-                output_text += "Информация отсутсвует."
-                break
-
-        cursor.close()
-        connection.close()
-
-        return output_text
-
-    except Exception:
-        raise ConnectionError('<b>Не удалось подключиться к базе данных</b>')
-
-    finally:
-        connection.close()
-
-
-# print(connectToSendData('0104607015490015215CEiB%-YJE4P>93qvtx'))
+            answer += 'ИНФОРМАЦИЯ ОТСУТСВУЕТ В ВЫБРАННОЙ БАЗЕ ДАННЫХ.\n'
+        answer += '----------------------------------------------------------------------------'
+        return answer
