@@ -21,7 +21,7 @@ class MainWindow(QWidget):
         self.start_scanning()
 
     def initialize_ui(self) -> None:
-        self.setFixedSize(700, 150)
+        self.setFixedSize(720, 180)
         self.setStyleSheet('background-color: grey')
         self.setWindowTitle('Symbol Bar Code Scanner')
         self.set_up_window()
@@ -40,6 +40,7 @@ class MainWindow(QWidget):
 
     def initialize_port(self) -> None:
         self.ini_port = serial.Serial(self.config[0], baudrate=int(self.config[1]))
+        self.curr_lable.setText('<font color="#b0afaf"> Подлкючение: </front><font color="green"> ДА </font>')
         while self.ini_port.is_open:
             data = self.ini_port.readline().decode().strip()
             if data:
@@ -49,32 +50,39 @@ class MainWindow(QWidget):
     def set_up_window(self) -> None:
         self.grid = QGridLayout()
 
-        self.lable = QLabel('<b>Данные с штрих-кода</b>')
+        self.curr_lable = QLabel('<font color="#b0afaf"> Подключение: </front><font color="red"> НЕТ </font>')
+        self.grid.addWidget(self.curr_lable, 0, 0)
+
+        self.lable = QLabel('Полученный код с устройства сканирования')
         self.lable.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.grid.addWidget(self.lable, 0, 1, 1, 2)
+        self.grid.addWidget(self.lable, 2, 0, 1, 4)
 
         self.scanner_field = QLineEdit()
-        self.grid.addWidget(self.scanner_field, 1, 0, 1, 4)
+        self.grid.addWidget(self.scanner_field, 3, 0, 1, 4)
 
-        self.start_button = QPushButton('Сброс')
-        self.start_button.setStyleSheet('background-color: #808080')
-        self.start_button.clicked.connect(self.scanner_field.clear)
-        self.grid.addWidget(self.start_button, 2, 0)
-
-        self.clipboard = QPushButton('Скопировать')
-        self.clipboard.setStyleSheet('background-color: #808080')
-        self.clipboard.clicked.connect(self.clipboard_copy)
-        self.grid.addWidget(self.clipboard, 2, 1)
-
-        self.showInformation = QPushButton('Информация о коде')
+        self.showInformation = QPushButton('🛈 Информация о коде')
+        self.showInformation.setFixedSize(170, 35)
         self.showInformation.setStyleSheet('background-color: #808080')
         self.showInformation.clicked.connect(self.grab_from_database)
-        self.grid.addWidget(self.showInformation, 2, 2)
+        self.grid.addWidget(self.showInformation, 4, 0)
+
+        self.clipboard = QPushButton('⊂–⊃ Скопировать')
+        self.clipboard.setFixedSize(170, 35)
+        self.clipboard.setStyleSheet('background-color: #808080')
+        self.clipboard.clicked.connect(self.clipboard_copy)
+        self.grid.addWidget(self.clipboard, 4, 1)
+
+        self.reset_button = QPushButton('Сброс')
+        self.reset_button.setFixedSize(170, 35)
+        self.reset_button.setStyleSheet('background-color: #808080')
+        self.reset_button.clicked.connect(self.scanner_field.clear)
+        self.grid.addWidget(self.reset_button, 4, 2)
 
         self.exit_button = QPushButton('Выход')
-        self.exit_button.setStyleSheet('background-color: red')
+        self.exit_button.setFixedSize(170, 35)
+        self.exit_button.setStyleSheet('background-color: #ff0f00')
         self.exit_button.clicked.connect(self.close_application)
-        self.grid.addWidget(self.exit_button, 2, 3)
+        self.grid.addWidget(self.exit_button, 4, 3)
 
         self.setLayout(self.grid)
 
