@@ -1,3 +1,5 @@
+"""Module scanner response for initialization GUI and connection to scanning device"""
+
 import sys
 import serial
 import os
