@@ -286,12 +286,12 @@ class MainWindow(QWidget):
         if self.gtin.text().isdigit():
             pass
         else:
-            errDesc += "Поле GTIN должно состоять только из цифр.\n"
+            errDesc += "• Поле GTIN должно состоять только из цифр.\n"
         if int(self.serial_length_spin.text()) >= len(
-                    self.serial_start_edit.text()) and self.serial_start_edit.text().isdigit():
+                self.serial_start_edit.text()) and self.serial_start_edit.text().isdigit():
             pass
         else:
-            errDesc += "Длина поля Serial превышает указанную длину или поле Serial не является целым числом.\n"
+            errDesc += "• Длина поля Serial превышает указанную длину или поле Serial не является целым числом.\n"
         if self.combox_decode.currentText() == '91/92 (44)' or self.combox_decode.currentText() == '91/92 (85)':
             if ((len(self.edit_tag91_1.text()) != 0 and len(
                     self.edit_tag92_1.text()) != 0) and self.combox_decode.currentText() == '91/92 (44)') or (
@@ -300,22 +300,20 @@ class MainWindow(QWidget):
                         self.edit_tag92_2.text()) != 0) and self.combox_decode.currentText() == '91/92 (85)'):
                 pass
             else:
-                errDesc += "Убедитесь что поля 91 и 92 заполнены.\n"
+                errDesc += "• Убедитесь что поля 91 и 92 заполнены.\n"
         elif self.combox_decode.currentText() == '93':
             if len(self.edit_tag93.text()) != 0:
                 pass
 
             else:
-                errDesc += "Убедитесь что полe 93 заполненo.\n"
+                errDesc += "• Убедитесь что полe 93 заполненo.\n"
 
         if self.quantity_edit.text().isdigit():
             pass
         else:
-            errDesc += "Некорректный формат поля Quantity.\n"
+            errDesc += "• Некорректный формат поля Quantity.\n"
 
         return errDesc
-
-
 
     def readConfig(self):
         path = os.getcwd() + '/config.ini'
@@ -363,18 +361,14 @@ class MainWindow(QWidget):
             self.codeGeneration()
 
     def saveFunc(self):
-        path_to, _ = QFileDialog.getSaveFileName(self, "Сохранение файла в выбранном формате.", "", "Text Files (*.txt);;Json Files (*.json)")
+        path_to, _ = QFileDialog.getSaveFileName(self, "Сохранение файла в выбранном формате.", "",
+                                                 "Text Files (*.txt);;Json Files (*.json)")
         try:
-            if self.group_buttons_view.checkedButton().text() == '.txt':
-                with open(str(path_to), 'w') as file:
-                    file.write(self.text_field.toPlainText())
-                    QMessageBox.information(self, "Сохранение файла",
-                                            f"Файл успешно сохранен в {path_to}")
-                    return
-            else:
-                with open(str(path_to), 'w') as file:
-                    file.write(self.text_field.toPlainText())
-                    QMessageBox.information(self, "Сохранение файла", f"Файл успешно сохранен в {path_to}")
-                    return
-        except:
-            QMessageBox.information(self, "Сохранение файла", "Ошибка при сохранении файла, убедитесь в корректности указанного пути, имени файла, параметров генерации (View и Format)")
+            text = self.text_field.toPlainText()
+            with open(fr"{path_to}", 'w', encoding='utf-8') as file:
+                file.write(text)
+                QMessageBox.information(self, "Сохранение файла",
+                                        f"Файл успешно сохранен в {path_to}")
+        except Exception:
+            QMessageBox.information(self, "Сохранение файла",
+                                    "Ошибка при сохранении файла, убедитесь в корректности указанного пути, имени файла, параметров генерации (View и Format)")
