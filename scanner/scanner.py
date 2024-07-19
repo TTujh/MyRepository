@@ -1,13 +1,13 @@
 """Module scanner response for initialization GUI and connection to scanning device"""
 
-import sys
+import time
 import serial
 import os
 import configparser
 import threading
 import sql_connection
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QGridLayout, QPushButton, QMessageBox
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QGridLayout, QPushButton, QMessageBox
 
 
 class MainWindow(QWidget):
@@ -16,16 +16,13 @@ class MainWindow(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self.initialize_ui()
-        self.flag = True
         self.config = self.read_config()
-        self.all_scanned_codes = set()
         self.is_ini_exists()
-        self.start_scanning()
 
     def initialize_ui(self) -> None:
         self.setFixedSize(720, 180)
         self.setStyleSheet('background-color: grey')
-        self.setWindowTitle('Symbol Bar Code Scanner')
+        self.setWindowTitle('Сканнер кода с datamatrix')
         self.set_up_window()
         self.show()
 
@@ -33,21 +30,21 @@ class MainWindow(QWidget):
         path = os.getcwd() + '/settings.ini'
         config = configparser.ConfigParser()
         config.read(path)
-        self.__dbname = config.get("DataBase", "dbname")
-        self.__user = config.get("DataBase", "user")
-        self.__password = config.get("DataBase", "password")
-        self.__host = config.get("DataBase", "host")
-        self.__port = config.get("DataBase", "port")
+        self.dbname = config.get("DataBase", "dbname")
+        self.user = config.get("DataBase", "user")
+        self.password = config.get("DataBase", "password")
+        self.host = config.get("DataBase", "host")
+        self.port = config.get("DataBase", "port")
         return config.get("COM", "path"), config.get("BAUD", "baudrate")
 
     def initialize_port(self) -> None:
-        self.ini_port = serial.Serial(self.config[0], baudrate=int(self.config[1]))
-        self.curr_lable.setText('<font color="#b0afaf"> Подлкючение: </front><font color="green"> ДА </font>')
         while self.ini_port.is_open:
             data = self.ini_port.readline().decode().strip()
             if data:
                 self.scanner_field.setText(data)
-                self.all_scanned_codes.add(data)
+
+        self.start_checking_for_connection()
+        self.process.join()
 
     def set_up_window(self) -> None:
         self.grid = QGridLayout()
@@ -97,6 +94,11 @@ class MainWindow(QWidget):
         self.process.daemon = True
         self.process.start()
 
+    def start_checking_for_connection(self) -> None:
+        self.process2 = threading.Thread(target=self.connection_checking)
+        self.process2.daemon = True
+        self.process2.start()
+
     def clipboard_copy(self) -> None:
         if self.scanner_field.text() != "":
             clipboard = QApplication.clipboard()
@@ -104,19 +106,32 @@ class MainWindow(QWidget):
 
     def grab_from_database(self) -> None:
         if self.scanner_field.text():
-            database = sql_connection.RemotePostgresDatabase(dbname=self.__dbname,
-                                                             user=self.__user,
-                                                             password=self.__password,
-                                                             host=self.__host,
-                                                             port=self.__port)
+            data = sql_connection.PostgresData(dbname=self.dbname, user=self.user, password=self.password,
+                                               host=self.host, port=self.port)
             QMessageBox.information(self, "Сопутсвующие характеристики кода",
-                                    database.get_answer(self.scanner_field.text().encode()),
+                                    data.fetch_data_from_sql_table(
+                                        self.scanner_field.text().encode().decode('unicode-escape').encode()),
                                     QMessageBox.StandardButton.Ok)
 
     def is_ini_exists(self) -> None:
         try:
-            ini = serial.Serial(self.config[0], baudrate=int(self.config[1]))
-            ini.close()
+            self.ini_port = serial.Serial(self.config[0], baudrate=int(self.config[1]))
+            self.start_scanning()
+            self.curr_lable.setText('<font color="#b0afaf"> Подлкючение: </front><font color="green"> ДА </font>')
+
         except Exception:
             QMessageBox.warning(self, "Ошибка подключения",
                                 f"Ошибка при попытке подключиться через порт {self.config[0]} c бод-частотой {self.config[1]}\nУбедитесь в корректности данных файла инициализации settings.ini ([COM], [BAUD])")
+            self.start_checking_for_connection()
+
+    def connection_checking(self) -> None:
+        while True:
+            time.sleep(2)
+            try:
+                self.ini_port = serial.Serial(self.config[0], baudrate=int(self.config[1]))
+                self.curr_lable.setText('<font color="#b0afaf"> Подлкючение: </front><font color="green"> ДА </font>')
+                self.start_scanning()
+                break
+            except:
+                self.curr_lable.setText('<font color="#b0afaf"> Подключение: </front><font color="red"> НЕТ </font>')
+        self.process2.join()
