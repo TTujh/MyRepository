@@ -110,7 +110,7 @@ class MainWindow(QWidget):
                                                host=self.host, port=self.port)
             QMessageBox.information(self, "Сопутсвующие характеристики кода",
                                     data.fetch_data_from_sql_table(
-                                        self.scanner_field.text().encode().decode('unicode-escape').encode()),
+                                        self.scanner_field.text().encode()),
                                     QMessageBox.StandardButton.Ok)
 
     def is_ini_exists(self) -> None:
@@ -130,8 +130,9 @@ class MainWindow(QWidget):
             try:
                 self.ini_port = serial.Serial(self.config[0], baudrate=int(self.config[1]))
                 self.curr_lable.setText('<font color="#b0afaf"> Подлкючение: </front><font color="green"> ДА </font>')
-                self.start_scanning()
                 break
             except:
                 self.curr_lable.setText('<font color="#b0afaf"> Подключение: </front><font color="red"> НЕТ </font>')
+                
+        self.start_scanning()
         self.process2.join()
