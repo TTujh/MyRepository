@@ -86,7 +86,8 @@ class MainWindow(QWidget):
         self.setLayout(self.grid)
 
     def close_application(self) -> None:
-        self.ini_port.close()
+        if self.ini_port.is_open:
+            self.ini_port.close()
         self.closeEvent()
 
     def start_scanning(self) -> None:
