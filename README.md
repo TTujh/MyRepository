@@ -24,7 +24,7 @@
 
 #!/bin/bash
 
-cd $(dirname $(find $(pwd) -name YouApplication)
+cd $( dirname $(find $(pwd) -name YouApplication )
 
 while true; do ./YouApplication ; sleep 3s; done
 
