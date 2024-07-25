@@ -45,7 +45,8 @@
 
 Пример того, как может выглядеть приложение в режиме киоска:
 
-![image](https://github.com/user-attachments/assets/ac4baeb6-ebbe-4c2a-a1b5-26c1620fd4df)
+![image](https://github.com/user-attachments/assets/fd0890a6-d8f5-4951-9bd5-52fe633239a5)
+
 
 Проверьте корректность работы вашего приложения.
 
