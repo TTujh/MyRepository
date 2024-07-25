@@ -2,7 +2,7 @@
 
 **1. Выбор виртуальной машины.**
 
-Данный способ был проверен на VMWare Workstation 17 Player и Oracle VM VirtualBox. Корректной работы удалось достичь только на Oracle VM VirtualBox, используя iso образ диска Ubuntu 24.04 LTS.
+Данный способ был проверен на VMWare Workstation 17 Player и Oracle VM VirtualBox. Корректной работы удалось достичь только на Oracle VM VirtualBox 7.0, используя iso образ диска Ubuntu 24.04 LTS.
 
 **2. Запуск и настройка операционной системы.**
 
