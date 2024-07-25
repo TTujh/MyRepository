@@ -25,7 +25,8 @@
 
 Набираем текст скрипта:
 
-![image](https://github.com/user-attachments/assets/b5513b6a-65eb-47be-be3d-877f346a644c)
+![image](https://github.com/user-attachments/assets/9113985c-b57c-4e63-9d55-59e98b6262bc)
+
 
 
 Сохраните скрипт и измените ему права также, как в вы уже делали в пункте 3. Проверьте исправность работы скрипта командой _sh /path/to/you/script.sh_. 
