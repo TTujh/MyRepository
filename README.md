@@ -22,11 +22,11 @@
 
 Набираем текст скрипта:
 
-_#!/bin/bash
+#!/bin/bash
 
 cd $( dirname $(find $(pwd) -name YouApplication )
 
-while true; do ./YouApplication ; sleep 3s; done_
+while true; do ./YouApplication ; sleep 3s; done
 
 Сохраните скрипт и измените ему права также, как в вы уже делали в пункте 3. Проверьте исправность работы скрипта командой _sh /path/to/you/script.sh_. 
 
