@@ -19,7 +19,7 @@ class MainWindow(QWidget):
         self.readConfig()
 
     def initializeUI(self):
-        self.showFullScreen()
+        self.showMaximized()
         self.setWindowTitle('Генератор кодов маркировки')
         self.setUpWindow()
         self.show()
