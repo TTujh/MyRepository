@@ -14,12 +14,12 @@ class MainWindow(QWidget):
         super().__init__()
         self.initializeUI()
         self.code = list()
-        self.serial_end = 0
+        self.serial_end = '0'
+        self.generate_flag = False
         self.readConfig()
 
     def initializeUI(self):
-
-        self.setStyleSheet('background-color: #6f9a9b;')
+        self.showFullScreen()
         self.setWindowTitle('Генератор кодов маркировки')
         self.setUpWindow()
         self.show()
@@ -135,7 +135,7 @@ class MainWindow(QWidget):
 
         # generate button
         self.generate_button = QPushButton('Generate')
-        self.generate_button.setStyleSheet('background-color: #647991')
+        # self.generate_button.setStyleSheet('background-color: #647991')
 
         self.generate_button.clicked.connect(self.codeGeneration)
         self.sub_layout_for_generate.addWidget(self.generate_button)
@@ -182,15 +182,15 @@ class MainWindow(QWidget):
 
         # group of bottom buttons
         self.copy_button = QPushButton('Copy')
-        self.copy_button.setStyleSheet('background-color: #9b776f')
+        # self.copy_button.setStyleSheet('background-color: #9b776f')
         self.copy_button.clicked.connect(self.clipBoardCopy)
 
         self.reset_button = QPushButton('Reset')
-        self.reset_button.setStyleSheet('background-color: #976981')
+        # self.reset_button.setStyleSheet('background-color: #976981')
         self.reset_button.clicked.connect(self.text_field.clear)
 
         self.save_button = QPushButton('Save...')
-        self.save_button.setStyleSheet('background-color: #866491')
+        # self.save_button.setStyleSheet('background-color: #866491')
         self.save_button.clicked.connect(self.saveFunc)
 
         self.exit_button = QPushButton('Exit')
@@ -207,6 +207,7 @@ class MainWindow(QWidget):
         self.stacked_layout.setCurrentIndex(index)
 
     def codeGeneration(self, **kwargs):
+        self.generate_flag = True
         error = self.errorRise()
         if error == "":
             pass
@@ -343,10 +344,14 @@ class MainWindow(QWidget):
         path = os.getcwd() + '/config.ini'
         config = configparser.ConfigParser()
         config.read(path)
+        if self.generate_flag:
+            self.serial_end = str(int(self.serial_start_edit.text()) + int(self.quantity_edit.text()))
+        else:
+            self.serial_end = self.serial_start_edit.text()
 
         config["GTIN_ID"]["id"] = self.box_id.currentText()
         config["GTIN"]["gtin"] = self.gtin.text()
-        config["SERIAL"]["start"] = str(self.serial_end + 1)
+        config["SERIAL"]["start"] = self.serial_end
         config["NINE_ONE_ONE"]["text"] = self.edit_tag91_1.text()
         config["NINE_TWO_ONE"]["text"] = self.edit_tag92_1.text()
         config["NINE_ONE_TWO"]["text"] = self.edit_tag91_2.text()
