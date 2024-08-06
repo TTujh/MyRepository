@@ -14,7 +14,7 @@ class MainWindow(QWidget):
         super().__init__()
         self.initializeUI()
         self.code = list()
-        self.serial_end = '0'
+        self.serial_end = 0
         self.generate_flag = False
         self.readConfig()
 
@@ -223,38 +223,38 @@ class MainWindow(QWidget):
         suffix_id = self.combox_decode.currentText()
         if suffix_id == '91/92 (44)':
             serial_current = ''
-            for i in range(int(self.quantity_edit.text())):
+            for i in range(1, int(self.quantity_edit.text()) + 1):
                 serial_current = '0' * (count_of_symbols_in_serial - len(str(serial_id + i))) + str(serial_id + i)
                 self.code.append(
                     id + GTIN + '21' + serial_current + '␝' + '91' + self.edit_tag91_1.text() + '␝' + '92' + self.edit_tag92_1.text())
             self.codeRemasteringB64(self.group_buttons_format.checkedButton().text())
             self.text_field.setText(self.codeRemasteringJson(self.group_buttons_view.checkedButton().text()))
-            self.serial_end = int(serial_current.strip('0'))
+            self.serial_end = int(serial_current.lstrip('0'))
         elif suffix_id == '91/92 (85)':
             serial_current = ''
-            for i in range(int(self.quantity_edit.text())):
+            for i in range(1, int(self.quantity_edit.text()) + 1):
                 serial_current = '0' * (count_of_symbols_in_serial - len(str(serial_id + i))) + str(serial_id + i)
                 self.code.append(
                     id + GTIN + '21' + serial_current + '␝' + '91' + self.edit_tag91_2.text() + '␝' + '92' + self.edit_tag92_2.text())
             self.codeRemasteringB64(self.group_buttons_format.checkedButton().text())
             self.text_field.setText(self.codeRemasteringJson(self.group_buttons_view.checkedButton().text()))
-            self.serial_end = int(serial_current.strip('0'))
+            self.serial_end = int(serial_current.lstrip('0'))
         elif suffix_id == '93':
             serial_current = ''
-            for i in range(int(self.quantity_edit.text())):
+            for i in range(1, int(self.quantity_edit.text()) + 1):
                 serial_current = '0' * (count_of_symbols_in_serial - len(str(serial_id + i))) + str(serial_id + i)
                 self.code.append(id + GTIN + '21' + serial_current + '␝' + '93' + self.edit_tag93.text())
             self.codeRemasteringB64(self.group_buttons_format.checkedButton().text())
             self.text_field.setText(self.codeRemasteringJson(self.group_buttons_view.checkedButton().text()))
-            self.serial_end = int(serial_current.strip('0'))
+            self.serial_end = int(serial_current.lstrip('0'))
         else:
             serial_current = ''
-            for i in range(int(self.quantity_edit.text())):
+            for i in range(1, int(self.quantity_edit.text()) + 1):
                 serial_current = '0' * (count_of_symbols_in_serial - len(str(serial_id + i))) + str(serial_id + i)
                 self.code.append(id + GTIN + '21' + serial_current + '␝' + self.edit_tag_free.text())
             self.codeRemasteringB64(self.group_buttons_format.checkedButton().text())
             self.text_field.setText(self.codeRemasteringJson(self.group_buttons_view.checkedButton().text()))
-            self.serial_end = int(serial_current.strip('0'))
+            self.serial_end = int(serial_current.lstrip('0'))
 
     def codeRemasteringB64(self, format):
         if format == '.b64':
@@ -344,14 +344,12 @@ class MainWindow(QWidget):
         path = os.getcwd() + '/config.ini'
         config = configparser.ConfigParser()
         config.read(path)
-        if self.generate_flag:
-            self.serial_end = str(int(self.serial_start_edit.text()) + int(self.quantity_edit.text()))
-        else:
+        if not self.generate_flag:
             self.serial_end = self.serial_start_edit.text()
 
         config["GTIN_ID"]["id"] = self.box_id.currentText()
         config["GTIN"]["gtin"] = self.gtin.text()
-        config["SERIAL"]["start"] = self.serial_end
+        config["SERIAL"]["start"] = str(self.serial_end)
         config["NINE_ONE_ONE"]["text"] = self.edit_tag91_1.text()
         config["NINE_TWO_ONE"]["text"] = self.edit_tag92_1.text()
         config["NINE_ONE_TWO"]["text"] = self.edit_tag91_2.text()
