@@ -1,30 +1,35 @@
-from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QGridLayout, QPushButton,
-                             QComboBox, QRadioButton, QHBoxLayout, QButtonGroup, QTextEdit, QSpinBox, QStackedWidget,
-                             QVBoxLayout, QMessageBox, QFileDialog)
-from PyQt6.QtCore import Qt
 import json
 import sys
 import os
 import configparser
 import base64
+from PyQt6.QtWidgets import (QApplication, QWidget, QLabel, QLineEdit, QGridLayout, QPushButton,
+                             QComboBox, QRadioButton, QHBoxLayout, QButtonGroup, QTextEdit, QSpinBox, QStackedWidget,
+                             QVBoxLayout, QMessageBox, QFileDialog)
+from PyQt6.QtCore import Qt
+from dataclasses import dataclass
 
 
-class MainWindow(QWidget):
-    def __init__(self):
-        super().__init__()
+@dataclass
+class MainInit:
+    code: list
+    serial_end: int = 0
+    generate_flag: bool = False
+
+
+class MainWindow(QWidget, MainInit):
+    def __init__(self) -> None:
+        super().__init__(code=[])
         self.initializeUI()
-        self.code = list()
-        self.serial_end = 0
-        self.generate_flag = False
         self.readConfig()
 
-    def initializeUI(self):
+    def initializeUI(self) -> None:
         self.showMaximized()
         self.setWindowTitle('Генератор кодов маркировки')
         self.setUpWindow()
         self.show()
 
-    def setUpWindow(self):
+    def setUpWindow(self) -> None:
         # create grid layout
         self.grid = QGridLayout()
         self.vboxlay = QVBoxLayout()
@@ -203,10 +208,10 @@ class MainWindow(QWidget):
         self.grid.addLayout(self.sub_layout_for_buttons_2, 6, 0, 1, 4)
         self.setLayout(self.grid)
 
-    def switchType(self, index):
+    def switchType(self, index) -> None:
         self.stacked_layout.setCurrentIndex(index)
 
-    def codeGeneration(self, **kwargs):
+    def codeGeneration(self, **kwargs) -> None:
         self.generate_flag = True
         error = self.errorRise()
         if error == "":
@@ -256,7 +261,7 @@ class MainWindow(QWidget):
             self.text_field.setText(self.codeRemasteringJson(self.group_buttons_view.checkedButton().text()))
             self.serial_end = int(serial_current.lstrip('0'))
 
-    def codeRemasteringB64(self, format):
+    def codeRemasteringB64(self, format) -> None:
         if format == '.b64':
             current_code = list()
             for i in self.code:
@@ -266,7 +271,7 @@ class MainWindow(QWidget):
                 current_code.append(base64_string)
             self.code = current_code
 
-    def codeRemasteringJson(self, view):
+    def codeRemasteringJson(self, view) -> str:
         if view == '.json':
             current = {"codes": []}
             for i in self.code:
@@ -279,22 +284,22 @@ class MainWindow(QWidget):
                 to_print_txt += x + '\n'
             return to_print_txt
 
-    def clipBoardCopy(self):
+    def clipBoardCopy(self) -> None:
         if self.text_field.toPlainText() != "":
             clipboard = QApplication.clipboard()
             clipboard.setText(f"{self.text_field.toPlainText()}")
 
-    def errorRise(self):
+    def errorRise(self) -> str:
         errDesc = ""
         if self.gtin.text().isdigit():
             pass
         else:
-            errDesc += "Поле GTIN должно состоять только из цифр.\n"
+            errDesc += "· Поле GTIN должно состоять только из цифр.\n"
         if int(self.serial_length_spin.text()) >= len(
-                    self.serial_start_edit.text()) and self.serial_start_edit.text().isdigit():
+                self.serial_start_edit.text()) and self.serial_start_edit.text().isdigit():
             pass
         else:
-            errDesc += "Длина поля Serial превышает указанную длину или поле Serial не является целым числом.\n"
+            errDesc += "· Длина поля Serial превышает указанную длину или поле Serial не является целым числом.\n"
         if self.combox_decode.currentText() == '91/92 (44)' or self.combox_decode.currentText() == '91/92 (85)':
             if ((len(self.edit_tag91_1.text()) != 0 and len(
                     self.edit_tag92_1.text()) != 0) and self.combox_decode.currentText() == '91/92 (44)') or (
@@ -303,24 +308,22 @@ class MainWindow(QWidget):
                         self.edit_tag92_2.text()) != 0) and self.combox_decode.currentText() == '91/92 (85)'):
                 pass
             else:
-                errDesc += "Убедитесь что поля 91 и 92 заполнены.\n"
+                errDesc += "· Убедитесь что поля 91 и 92 заполнены.\n"
         elif self.combox_decode.currentText() == '93':
             if len(self.edit_tag93.text()) != 0:
                 pass
 
             else:
-                errDesc += "Убедитесь что полe 93 заполненo.\n"
+                errDesc += "· Убедитесь что полe 93 заполненo.\n"
 
         if self.quantity_edit.text().isdigit():
             pass
         else:
-            errDesc += "Некорректный формат поля Quantity.\n"
+            errDesc += "· Некорректный формат поля Quantity.\n"
 
         return errDesc
 
-
-
-    def readConfig(self):
+    def readConfig(self) -> None:
         path = os.getcwd() + '/config.ini'
         config = configparser.ConfigParser()
         config.read(path)
@@ -340,7 +343,7 @@ class MainWindow(QWidget):
         # )
         self.quantity_edit.setText(config.get("QUANTITY", "value"))
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         path = os.getcwd() + '/config.ini'
         config = configparser.ConfigParser()
         config.read(path)
@@ -363,12 +366,13 @@ class MainWindow(QWidget):
             config.write(configfile)
         sys.exit(0)
 
-    def supportingFunc(self):
+    def supportingFunc(self) -> None:
         if len(self.text_field.toPlainText()) != 0:
             self.codeGeneration()
 
-    def saveFunc(self):
-        path_to, _ = QFileDialog.getSaveFileName(self, "Сохранение файла в выбранном формате.", "", "Text Files (*.txt);;Json Files (*.json)")
+    def saveFunc(self) -> None:
+        path_to, _ = QFileDialog.getSaveFileName(self, "Сохранение файла в выбранном формате.", "",
+                                                 "Text Files (*.txt);;Json Files (*.json)")
         try:
             if self.group_buttons_view.checkedButton().text() == '.txt':
                 with open(str(path_to), 'w') as file:
@@ -382,4 +386,5 @@ class MainWindow(QWidget):
                     QMessageBox.information(self, "Сохранение файла", f"Файл успешно сохранен в {path_to}")
                     return
         except:
-            QMessageBox.information(self, "Сохранение файла", "Ошибка при сохранении файла, убедитесь в корректности указанного пути, имени файла, параметров генерации (View и Format)")
+            QMessageBox.information(self, "Сохранение файла",
+                                    "Ошибка при сохранении файла, убедитесь в корректности указанного пути, имени файла, параметров генерации (View и Format)")
